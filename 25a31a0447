@@ -1,0 +1,178 @@
+//Mapping The Locations
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#define MAX_LOCATIONS 200
+
+// Structure for coordinates
+typedef struct {
+    float latitude;
+    float longitude;
+} Coordinates;
+
+// Enum for location type
+typedef enum {
+    HOSPITAL,
+    SCHOOL,
+    BUILDING,
+    OTHER
+} LocationType;
+
+// Structure for location
+typedef struct {
+    char name[100];
+    LocationType type;
+    Coordinates coord;
+} Location;
+
+// Global storage
+Location locations[MAX_LOCATIONS];
+int count = 0;
+
+// Function to convert type to string
+const char* getTypeName(LocationType type) {
+    switch(type) {
+        case HOSPITAL: return "Hospital";
+        case SCHOOL: return "School";
+        case BUILDING: return "Building";
+        default: return "Other";
+    }
+}
+
+// Add location
+void addLocation() {
+    if (count >= MAX_LOCATIONS) {
+        printf("Storage full!\n");
+        return;
+    }
+
+    Location loc;
+
+    printf("Enter name: ");
+    scanf(" %[^\n]", loc.name);
+
+    int typeChoice;
+    printf("Select type (0: Hospital, 1: School, 2: Building, 3: Other): ");
+    scanf("%d", &typeChoice);
+
+    loc.type = (LocationType)typeChoice;
+
+    printf("Enter latitude: ");
+    scanf("%f", &loc.coord.latitude);
+
+    printf("Enter longitude: ");
+    scanf("%f", &loc.coord.longitude);
+
+    locations[count++] = loc;
+
+    printf("Location added successfully!\n");
+}
+
+// Display all locations
+void displayLocations() {
+    if (count == 0) {
+        printf("No locations available.\n");
+        return;
+    }
+
+    printf("\n--- All Locations ---\n");
+    for (int i = 0; i < count; i++) {
+        printf("%d. %s | %s | (%.2f, %.2f)\n",
+               i + 1,
+               locations[i].name,
+               getTypeName(locations[i].type),
+               locations[i].coord.latitude,
+               locations[i].coord.longitude);
+    }
+}
+
+// Search by type
+void searchByType() {
+    int typeChoice;
+    printf("Enter type to search (0: Hospital, 1: School, 2: Building, 3: Other): ");
+    scanf("%d", &typeChoice);
+
+    printf("\nResults:\n");
+    for (int i = 0; i < count; i++) {
+        if (locations[i].type == typeChoice) {
+            printf("%s | (%.2f, %.2f)\n",
+                   locations[i].name,
+                   locations[i].coord.latitude,
+                   locations[i].coord.longitude);
+        }
+    }
+}
+
+// Distance calculation (Euclidean)
+float calculateDistance(Coordinates a, Coordinates b) {
+    return sqrt(pow(a.latitude - b.latitude, 2) +
+                pow(a.longitude - b.longitude, 2));
+}
+
+// Find nearest location
+void findNearest() {
+    if (count == 0) {
+        printf("No locations available.\n");
+        return;
+    }
+
+    Coordinates user;
+    printf("Enter your latitude: ");
+    scanf("%f", &user.latitude);
+
+    printf("Enter your longitude: ");
+    scanf("%f", &user.longitude);
+
+    float minDist = 999999;
+    int index = -1;
+
+    for (int i = 0; i < count; i++) {
+        float dist = calculateDistance(user, locations[i].coord);
+        if (dist < minDist) {
+            minDist = dist;
+            index = i;
+        }
+    }
+
+    if (index != -1) {
+        printf("Nearest Location:\n");
+        printf("%s (%s)\n",
+               locations[index].name,
+               getTypeName(locations[index].type));
+        printf("Distance: %.2f\n", minDist);
+    }
+}
+
+// Menu
+void menu() {
+    int choice;
+
+    while (1) {
+        printf("\n--- Location Mapping System ---\n");
+        printf("1. Add Location\n");
+        printf("2. Display All Locations\n");
+        printf("3. Search by Type\n");
+        printf("4. Find Nearest Location\n");
+        printf("5. Exit\n");
+        printf("Enter choice: ");
+
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: addLocation(); break;
+            case 2: displayLocations(); break;
+            case 3: searchByType(); break;
+            case 4: findNearest(); break;
+            case 5: exit(0);
+            default: printf("Invalid choice!\n");
+        }
+    }
+}
+
+// Main function
+int main() {
+    menu();
+    return 0;
+}
